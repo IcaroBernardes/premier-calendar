@@ -1,0 +1,130 @@
+/* Torna a fonte 'Font Awesome 6 -  Brands' disponível */
+@font-face {
+  font-family: 'FA6brands';
+  src:  url('./fonts/FA6brands.woff') format('woff'), /* Modern Browsers */
+        url('./fonts/FA6brands.ttf')  format('truetype'); /* Safari, Android, iOS */
+}
+
+/* Configura o body */
+body {
+  margin: 0;
+  font-family: 'Comfortaa', cursive;
+  font-size: 1vw;
+  background: black;
+}
+
+/* Configura o container geral */
+#encompass {
+  display: flex;
+}
+
+/* Configura os containers do menu lateral e do conteúdo */
+#sidebar {
+  width: 20vw;
+  height: 100vh;
+  padding: 3vmin;
+  display: flex;
+  flex-direction: column;
+  gap: 5vh;
+  z-index: 1;
+  background-color: #202020;
+  box-shadow: #202020 2px 0 6px 3px;
+  color: white;
+  transition: background-color 1.5s cubic-bezier(0.65, 0.05, 0.36, 1), box-shadow 1.5s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#container {
+  width: 80vw;
+  height: 100vh;
+}
+
+/* Configura o iframe com conteúdo */
+.content {
+  width: 80vw;
+  height: 100vh;
+  border: none;
+  overflow-x: hidden;
+  display: none;
+  position: absolute;
+}
+
+/* Configura elementos no menu lateral */
+#title {
+  font-size: 1.8em;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.selectize-control input {
+  width: 50% !important;
+}
+
+#context {  
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  font-size: 0.95em;
+}
+
+#explanation, #authorship {
+  width: 100%;
+  font-size: 0.8em;
+  color: #afafaf;
+}
+
+#context strong {
+  color: white;
+}
+
+.mouseicons {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-row-gap: 1vh;
+  align-items: baseline;
+  justify-items: center;
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-top: 1vh;
+  margin-bottom: 2vh;
+  color: white;
+}
+
+.mouseicons img {
+  width: 50%;
+  max-width: 5vh;
+}
+
+#sidebar a {
+  mix-blend-mode: difference;
+  color: white;
+  text-decoration: none;
+  transition: all .5s;
+}
+
+#sidebar a:hover {
+  color: #afafaf;
+  text-decoration: none;
+}
+
+#profiles {
+  display: flex;
+  justify-content: space-around;
+}
+
+.glyphs {
+  font-family: 'FA6brands';
+  font-size: 2em;
+}
+
+#twt:before {
+  content: '\f099';
+}
+
+#ghb:before {
+  content: '\f09b';
+}
+
+#lkd:before {
+  content: '\f08c';
+}

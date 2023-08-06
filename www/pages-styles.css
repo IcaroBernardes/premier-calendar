@@ -1,0 +1,180 @@
+/* Define plano de fundo */
+body {
+  background: black;
+  font-size: 1vmin;
+  font-family: 'Comfortaa', cursive;
+}
+
+/* Ajusta conteúdo à tela */
+#quarto-content {
+  display: block;
+}
+
+main {
+  margin: auto;
+  width: 90vmin;
+  height: 90vmin;
+}
+
+/* Aplica o cursor "pointer" a elementos interativos */
+svg circle, svg image {
+  cursor: pointer;
+}
+
+/* Stops the teams names to react directly to the mouse */
+text, rect {
+  pointer-events: none !important;
+}
+
+/* Posiciona o logo do clube */
+.logo-team {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 20%;
+  height: 20%;
+}
+
+/* Customiza as tooltips de resumo */
+.tip-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 1vmin;
+  align-items: end;
+  padding: 2vmin;
+}
+
+.tip-pts {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.tip-ssn {
+  font-size: 1.8em;
+}
+
+/* Customiza as tooltips em cards */
+.card-container {
+  width: 50vmin;
+  height: 30vmin;
+  color: black;
+  font-weight: bold;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  padding: 0;
+}
+
+.card-turn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 20%;
+  padding: 0 3vmin;
+}
+
+.card-turn-date {
+  font-size: 2em;
+  line-height: 1;
+}
+
+.card-turn-cumulative {
+  display: flex;
+  align-items: center;
+  gap: 1vmin;
+}
+
+.card-turn-points {
+  font-size: 3.5em;
+}
+
+.card-turn-text {
+  font-size: 1.5em;
+  line-height: 1.1;
+}
+
+.card-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 87%;
+  height: 80%;
+  border-radius: 0 3vmin;
+  padding: 2vmin;
+  background: #00000033;
+}
+
+.card-nowgame {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  font-size: 6.5em;
+}
+
+.card-nowgame img {
+  max-height: 7vmin;
+  max-width: 7vmin;
+}
+
+.card-past {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7vmin;
+  width: 100%;
+}
+
+.card-past-title {
+  text-align: center;
+  font-size: 2.2em;
+}
+
+.card-past-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.card-past-games {
+  font-size: 1.5em;
+}
+
+.card-past-games img {
+  width: 3vmin;
+  height: 3vmin;
+  padding-bottom: 4%;
+}
+
+.card-history {
+  display: flex;
+  justify-content: space-evenly;
+  width: 13%;
+  height: 80%;
+  padding: 2.5vmin 0;
+}
+
+.card-history-values {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.card-history-abrv {
+  font-size: 1.5em;
+}
+
+.card-history-title {
+  writing-mode: vertical-rl;
+  font-size: 1.05em;
+}
+
+.card-out {
+  padding: 2vmin;
+  color: black;
+  font-weight: bold;
+  font-size: 1.5em;
+}

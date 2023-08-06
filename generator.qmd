@@ -1,0 +1,578 @@
+---
+params:
+  team: "team1"
+format:
+  html:
+    css: www/pages-styles.css
+execute: 
+  echo: false
+  warning: false
+  error: false
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- Connects to the font "Comfortaa" of Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&display=swap" rel="stylesheet">
+
+```{r}
+
+# Loads libraries
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(ggiraph)
+library(ggnewscale)
+library(ggpath)
+library(ggtext)
+library(glue)
+library(purrr)
+library(readr)
+library(stringi)
+library(stringr)
+library(tidyr)
+
+# Loads the database of results from 1993-94 to 2021-22
+downloadedData <- readr::read_csv("data/downloadedData.csv")
+
+# Loads the database of results from 2022-23
+scrapped2022Data <- readr::read_csv("data/scrapped2022Data.csv")
+
+# Joins all data
+matches <- dplyr::bind_rows(scrapped2022Data, downloadedData)
+
+# "Hacking" {ggiraph} to add an interactive version of ggpath::geom_from_path()
+geom_from_path_interactive <- function(...)
+{ggiraph:::layer_interactive(ggpath::geom_from_path, ...)}
+
+GeomInteractiveFromPath <- ggplot2::ggproto(
+  "GeomInteractiveFromPath",
+  ggpath::GeomFromPath,
+  default_aes = ggiraph:::add_default_interactive_aes(ggpath::GeomFromPath),
+  parameters = ggiraph:::interactive_geom_parameters,
+  draw_key = ggiraph:::interactive_geom_draw_key,
+  draw_panel = function(data, panel_params, coord, ..., .ipar = ggiraph:::IPAR_NAMES) {
+    zz <- ggpath::GeomFromPath$draw_panel(data, panel_params, coord, ...)
+    coords <- coord$transform(data, panel_params)
+    ggiraph:::add_interactive_attrs(zz, coords, ipar = .ipar)
+  }
+)
+
+# Defines team
+selected_team <- params$team
+
+```
+
+```{r}
+
+# Extra procedures to build the placeholder with instructions
+if (selected_team == "team1") {
+  
+  ## Defines the seasons
+  temp <- unique(matches$season)
+  
+  ## Builds fake data to represent the matches
+  matches <- temp |> 
+    purrr::map_dfr(function (temp) {
+      
+      year = stringr::str_extract(temp, "[:digit:]{4}") |> 
+        as.numeric()
+      
+      time = dplyr::tibble(
+        season = rep(temp, 380),
+        day = seq(as.Date(glue::glue("{year}/8/1")),
+                  as.Date(glue::glue("{year+1}/6/1")),
+                  length.out = 380)
+      )
+      
+      team = expand.grid(
+        home = glue::glue("team{1:20}"),
+        away = glue::glue("team{1:20}")
+      ) |> 
+        dplyr::filter(home != away) |> 
+        dplyr::slice_sample(n = 380)
+      
+      dplyr::bind_cols(time, team)
+      
+      
+    }) |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(
+      homeGoals = sample(1:3, 1),
+      awayGoals = sample(1:3, 1),
+      .before = "away"
+    ) |> 
+    dplyr::ungroup() |> 
+    dplyr::mutate(winner = case_when(homeGoals > awayGoals ~ "H",
+                                     homeGoals < awayGoals ~ "A",
+                                     TRUE ~ "D"))
+  
+  ## Define coordenadas dos itens extras para o gráfico
+  extras_df <- dplyr::tibble(
+    x = c(-41.1, 0, -28.4),
+    y = c(31.7, 24, -18),
+    path = glue::glue("www/mouse_{c('click','hover','hover')}.png"),
+    hjust = 0,
+    vjust = 0.5,
+    label = c(
+      "List of rivals that the<br>team played against.<br>
+      Click on one of them to highlight<br>matches against an specific team",
+      
+      "Bigger bubbles represent the<br>team score at the end of the season.<br>
+      Hover the mouse on them to see the values.<br><br>
+      Colors indicate how high the score is<br>
+      from 1 <span style='color:#A82A00;'>(red)</span> to 100 <span style='color:#00A81C;'>(green)</span>.<br>
+      Seasons in which the team was<br>out of the Premier League are in <span style='color:#636363;'>(gray)</span>.<br><br>
+      Points deductions are included:<br>
+      <sub>Middlesbrough (-3pts on 1996-97);<br>
+      Portsmouth (-9pts on 2009-10)</sub>",
+      
+      "Smaller bubbles represent the result of a match:<br>
+      victories <span style='color:#00CC22;'>(green)</span>, draws <span style='color:white;'>(white)</span> e defeats <span style='color:#EB3B00;'>(red)</span>.<br>
+      <span style='color:#636363;'>Gray</span> bubbles represent matches in which the team was out of the Premier League.<br><br>
+      Hover the mouse on them to see a tooltip that shows<br>
+      informations on the match, last confrontations between the teams<br>
+      and historical performance of the team on the same turn of past seasons.<br><br>
+      <img src='www/tipVic.png' width='70' /><img src='www/tipDrw.png' width='70' /><img src='www/tipDft.png' width='70' />"
+    )
+  )
+  
+  ## Gera o itens extras para o gráfico
+  extras_img <- 
+    ggpath::geom_from_path(
+      aes(x = x, y = y, path = path),
+      width = 0.07, height = 0.07, data = extras_df
+    )
+  extras_lbl <- 
+    ggtext::geom_richtext(
+      aes(x = x, y = y, label = label),
+      hjust = 0, vjust = 0.5, nudge_x = 2, lineheight = 1.3,
+      label.colour = NA, fill = "#000000c7", color = "white",
+      label.padding = unit(c(0.45, 0.45, 0.45, 0.45), "lines"),
+      size = 2, family = "Comfortaa", data = extras_df
+    )
+  
+} else {
+  extras_img <- NULL
+  extras_lbl <- NULL
+}
+
+```
+
+```{r}
+
+# Changes the name of "Nott'm Forest" to avoid errors
+matches <- matches |>
+  dplyr::mutate(across(.cols = c("home", "away"),
+                       .fns = ~stringr::str_replace(., "Nott'm Forest", "Nottingham Forest")))
+
+# Arranges the data by season and day.
+# Converts the seasons column to factor 
+matches <- matches |> 
+  dplyr::arrange(season, day) |> 
+  dplyr::mutate(season = factor(season))
+
+# Keeps matches of the selected team only
+matches <- matches |> 
+  dplyr::filter(if_any(.cols = c("home","away"),
+                       .fns = ~. == selected_team))
+
+# Adds match order in the season
+matches <- matches |> 
+  dplyr::group_by(season) |> 
+  dplyr::mutate(order_match = 1:n(),
+                order_match = factor(order_match)) |> 
+  dplyr::ungroup()
+
+# Identifies rivals and stadium status of the selected team (home or away)
+matches <- matches |> 
+  dplyr::mutate(rival = ifelse(home == selected_team, away, home),
+                team = ifelse(home == selected_team, "home", "away")) 
+
+# Extrai os gols do time e seus rivais
+matches <- matches |> 
+  dplyr::mutate(goals_for = ifelse(team == "home", homeGoals, awayGoals),
+                goals_against = ifelse(team == "home", awayGoals, homeGoals)) |> 
+  dplyr::mutate(across(.cols = starts_with("goals"),
+                       .fns = ~ifelse(stringr::str_length(.) == 0, NA, .)))
+
+# Calculates points based on results
+matches <- matches |>
+  dplyr::mutate(points = case_when(goals_for > goals_against ~ 3,
+                                   goals_for == goals_against ~ 1,
+                                   goals_for < goals_against ~ 0))
+
+# Calculates cumulative points for each season
+matches <- matches |>
+  dplyr::group_by(season) |> 
+  dplyr::mutate(cumpoints = cumsum(points)) |> 
+  dplyr::ungroup()
+
+# Substitutes NA for hyphens
+matches <- matches |>
+  dplyr::mutate(cumpoints = ifelse(is.na(cumpoints), "—", cumpoints))
+
+# Fills empty seasons in which the team did not play de main league
+matches <- matches |>
+  tidyr::complete(season, order_match)
+
+# Calculates the total score by season
+scoring <- matches |> 
+  dplyr::group_by(season) |> 
+  dplyr::summarise(points = sum(points, na.rm = TRUE)) |> 
+  dplyr::ungroup()
+
+# Applies registred deductions (taken from Wikipedia pages)
+## Middlesbrough -3pts (1996-97)
+## Portsmouth -9pts (2009-10)
+if (selected_team %in% c("Middlesbrough", "Portsmouth")) {
+  
+  loss <- switch(selected_team,
+                 `Middlesbrough` = -3,
+                 `Portsmouth` = -9)
+  
+  occasion <- switch(selected_team,
+                     `Middlesbrough` = "1996-97",
+                     `Portsmouth` = "2009-10")
+  
+  scoring <- scoring |> 
+    dplyr::mutate(points = ifelse(season == occasion, points+loss, points))
+  
+}
+
+# Substitutes zeros for hyphens in the total score
+scoring <- scoring |>
+  dplyr::mutate(label = ifelse(points == 0, "—", points))
+
+# Composes the tooltips for the total score
+scoring <- scoring |>
+  dplyr::mutate(tooltip = glue::glue(
+    "<div class='tip-container'><span class='tip-pts'>{label}</span>PTS
+    <span class='tip-ssn'>{season}</span></div>"
+  ))
+
+# Converts the points to factor
+matches <- matches |>
+  dplyr::mutate(points = factor(points))
+
+# Gets the file name of the teams badges
+logo_team <- stringi::stri_trans_general(selected_team, "latin-ascii; lower") |>
+  stringr::str_replace_all(c("[:space:]" = "-"))
+
+# Gets the file names of the rival teams badges
+matches <- matches |>
+  dplyr::mutate(rival_logo = stringi::stri_trans_general(rival, "latin-ascii; lower"),
+                rival_logo = stringr::str_replace_all(rival_logo, c("[:space:]" = "-")),
+                home_logo = ifelse(team == "home", logo_team, rival_logo),
+                away_logo = ifelse(team == "away", logo_team, rival_logo))
+
+# Creates a "score" variable
+matches <- matches |>
+  dplyr::mutate(score = glue::glue("{homeGoals} x {awayGoals}"))
+
+# Lists matches against rivals
+rivals <- matches |>
+  dplyr::rename("pastday" = "day") |> 
+  dplyr::filter(!is.na(points)) |> 
+  dplyr::group_by(rival) |> 
+  tidyr::nest() |> 
+  dplyr::ungroup()
+
+# Adds the list of macthes
+matches <- matches |>
+  dplyr::left_join(rivals)
+
+# Creates a section of the tooltip that shows
+# the last three matches against a given rival
+matches <- matches |>
+  dplyr::mutate(data = purrr::map2(
+    .x = data,
+    .y = day,
+    .f = function(df, refday) {
+      if (!is.null(df)) {
+        df |> 
+          dplyr::filter(refday > pastday) |> 
+          dplyr::mutate(tip = glue::glue(
+            "<div class='card-past-games'>
+              <img src='www/badges/{home_logo}.svg'>
+              {score}
+              <img src='www/badges/{away_logo}.svg'>
+            </div>"
+          )) |> 
+          dplyr::slice_max(order_by = pastday, n = 3) |> 
+          dplyr::summarise(tip = glue::glue_collapse(tip)) |> 
+          dplyr::pull(tip)
+      } else {
+        ""
+      }
+    })) |> 
+  tidyr::unnest(cols = data, keep_empty = TRUE) |> 
+  dplyr::mutate(data = ifelse(is.na(data), "", data)) |> 
+  dplyr::rename("past" = "data")
+
+# Lists the historical performance by turn for different seasons
+history <- matches |> 
+  dplyr::rename("pastday" = "day") |> 
+  dplyr::filter(!is.na(points)) |> 
+  dplyr::group_by(order_match) |> 
+  tidyr::nest() |> 
+  dplyr::ungroup()
+
+# Adds the historical performance
+matches <- matches |>
+  dplyr::left_join(history)
+
+# Creates a section of the tooltip that shows
+# the historical performance on a given turn
+matches <- matches |>
+  dplyr::mutate(data = purrr::map2(
+    .x = data,
+    .y = day,
+    .f = function(df, refday) {
+      if (!is.null(df)) {
+        df = df |> 
+          dplyr::filter(refday > pastday) |> 
+          dplyr::mutate(points = forcats::fct_recode(points, "v" = "3", "e" = "1", "d" = "0"))
+        
+        forcats::fct_count(df$points) |> 
+          tidyr::pivot_wider(names_from = f, values_from = n) |> 
+          dplyr::mutate(tip = glue::glue(
+            "<div>
+              <span class='card-history-abrv'>V</span><br>{v}
+            </div>
+            <div>
+              <span class='card-history-abrv'>E</span><br>{e}
+            </div>
+            <div>
+              <span class='card-history-abrv'>D</span><br>{d}
+            </div>"
+          )) |> 
+          dplyr::pull(tip)
+      } else {
+        ""
+      }
+    })) |> 
+  tidyr::unnest(cols = data, keep_empty = TRUE) |> 
+  dplyr::mutate(data = ifelse(is.na(data), "", data)) |> 
+  dplyr::rename("history" = "data")
+
+# Creates a label that indicates the turn number and season
+matches <- matches |>
+  dplyr::mutate(turn = stringr::str_pad(order_match, width = 2, pad = "0"),
+                turn = glue::glue("TURN #{turn} ({season})"))
+
+# Creates tooltips for the total scores
+matches <- matches |>
+  dplyr::mutate(tooltip = glue::glue(
+    "<div class='card-container'>
+    
+      <div class='card-turn'>
+        <div>
+          <div class='card-turn-date'>{day}</div>
+          {turn}
+        </div>
+        <div class='card-turn-cumulative'>
+          <div class='card-turn-points'>{cumpoints}</div>
+          <div class='card-turn-text'>POINTS THIS<br>SEASON</div>
+        </div>
+      </div>
+    
+      <div class='card-main'>
+        <div class='card-nowgame'>
+          <img src='www/badges/{home_logo}.svg'>
+          {score}
+          <img src='www/badges/{away_logo}.svg'>
+        </div>
+        <div class='card-past'>
+          <div class='card-past-title'>LAST MATCHES</div>
+          <div class='card-past-content'>{past}</div>
+        </div>
+      </div>
+    
+      <div class='card-history'>
+        <div class='card-history-values'>{history}</div>
+        <div class='card-history-title'>TURN HISTORICAL PERFORMANCE</div>
+      </div>
+    
+    </div>"
+  )) |> 
+  dplyr::mutate(tooltip = ifelse(is.na(day),
+                                 "<div class='card-out'>OUT OF THE<br>MAIN LEAGUE</div>",
+                                 tooltip))
+
+# Keeps only the relevant columns
+matches <- matches |>
+  dplyr::select(season, day, order_match,
+                rival, team, points, score,
+                goals_for, goals_against,
+                tooltip, home_logo, away_logo)
+
+```
+
+```{r}
+
+# Defines the points coordinates (matches)
+matches <- matches |> 
+  dplyr::mutate(phi = (2/39)*(as.numeric(order_match)),
+                r = as.numeric(season)+10,
+                x = r*sinpi(phi),
+                y = r*cospi(phi))
+
+# Defines the points coordinates (total scores)
+scoring <- scoring |> 
+  dplyr::mutate(r = as.numeric(season)+10) |> 
+  dplyr::mutate(phi = (2/39)*(39),
+                x = r*sinpi(phi),
+                y = r*cospi(phi))
+
+# Defines the coordinates of the rival teams badges on the "menu"
+posY <- seq(40, -40, length.out = 24)
+rivals <- rivals |> 
+  dplyr::arrange(rival) |> 
+  dplyr::mutate(path = stringi::stri_trans_general(rival, "latin-ascii; lower"),
+                path = stringr::str_replace_all(path, c("[:space:]" = "-")),
+                path = glue::glue("www/badges/{path}.svg"),
+                x = ifelse(row_number() <= (ceiling(nrow(rivals)/2)), -41, 41)) |> 
+  dplyr::group_by(x) |> 
+  dplyr::mutate(y = posY[1:n()]) |> 
+  dplyr::ungroup()
+
+# Defines the coordinates of the selected team badge
+teamdf <- dplyr::tibble(
+  x = 0,
+  y = 1,
+  path = glue::glue("www/badges/{logo_team}.svg")
+)
+
+# Generates the static version of the graphic
+static <- matches |> 
+  ggplot() +
+  
+  ## Places the matches (points)
+  ggiraph::geom_point_interactive(
+    aes(x = x, y = y, color = points,
+        tooltip = tooltip, data_id = rival),
+    size = 0.4
+  ) +
+  ## Defines mapping according to the matches results
+  scale_color_discrete(type = c("0" = "#EB3B00", "1" = "white", "3" = "#00CC22"),
+                       na.value = "#636363") +
+  
+  ## Places the total scores (points)
+  ggiraph::geom_point_interactive(
+    aes(x = x, y = y, fill = points, tooltip = tooltip),
+    shape = 21, color = "black", size = 2, data = scoring
+  ) +
+  ## Defines mapping according to the total score of the season
+  scale_fill_gradient(low = "#A82A00", high = "#00A81C",
+                       na.value = "#636363", limits = c(1,100)) +
+  
+  ## Places the selected team badge
+  geom_point(
+    aes(x = x, y = y),
+    color = "white", size = 25, data = teamdf
+  ) +
+  ggpath::geom_from_path(
+    aes(x = x, y = y, path = path),
+    width = 0.10, height = 0.10, data = teamdf
+  ) +
+  
+  ## Places the rival teams badges and their names
+  geom_rect_interactive(
+    aes(xmin = x-1, xmax = x+14, ymin = y-1.1, ymax = y+1.1, data_id = rival),
+    fill = "white", alpha = 0, data = dplyr::filter(rivals, sign(x) == -1)
+  ) +
+  geom_rect_interactive(
+    aes(xmin = x+1, xmax = x-14, ymin = y-1.1, ymax = y+1.1, data_id = rival),
+    fill = "white", alpha = 0, data = dplyr::filter(rivals, sign(x) == 1)
+  ) +
+  ggiraph::geom_text_interactive(
+    aes(x = x, y = y, label = rival, data_id = rival),
+    color = "white", size = 1.5, nudge_x = 2,
+    family = "Comfortaa", alpha = 0, hjust = 0,
+    data = dplyr::filter(rivals, sign(x) == -1)
+  ) +
+  ggiraph::geom_text_interactive(
+    aes(x = x, y = y, label = rival, data_id = rival),
+    color = "white", size = 1.5, nudge_x = -2,
+    family = "Comfortaa", alpha = 0, hjust = 1,
+    data = dplyr::filter(rivals, sign(x) == 1)
+  ) +
+  ggiraph::geom_point_interactive(
+    aes(x = x, y = y, data_id = rival),
+    color = "white", size = 4, data = rivals
+  ) +
+  geom_from_path_interactive(
+    aes(x = x, y = y, path = path, data_id = rival),
+    width = 0.014, height = 0.014, data = rivals
+  ) +
+  
+  ## Places labels to indicate the first and last seasons
+  annotate("text", x = 0, y = 39.5, color = "#9e9e9e", size = 1.5,
+           family = "Comfortaa", vjust = 0, label = "2022-23") +
+  annotate("text", x = 0, y = 9.5, color = "#9e9e9e", size = 1.5,
+           family = "Comfortaa", vjust = 1, label = "1995-96") +
+  
+  ## Places the selected team name
+  annotate("text", x = 0, y = -7.3, color = "white", size = 1.8,
+           family = "Comfortaa", label = toupper(selected_team)) +
+  
+  ## Places lines and text to indicate the halves of the seasons
+  annotate("segment", x = 0, xend = 0, y = -10.5, yend = -40,
+           color = "#9e9e9e", linetype = "dashed", linewidth = 0.3) +
+  annotate("text", x = 0, y = -39.5, color = "#9e9e9e", size = 2,
+           family = "Comfortaa", hjust = -0.1, vjust = 0.5,
+           label = "1ST HALF OF THE SEASON") +
+  annotate("text", x = 0, y = -39.5, color = "#9e9e9e", size = 2,
+           family = "Comfortaa", hjust = 1.1, vjust = 0.5,
+           label = "2ND HALF OF THE SEASON") +
+  
+  ## Guarantees that both axes have the same proportions
+  coord_equal(xlim = c(-40,40), ylim = c(-40,40)) +
+  
+  ## Customize aesthetics
+  theme_void() +
+  theme(
+    legend.position = "none",
+    plot.background = element_rect(fill = "black", color = "black")
+  ) +
+  
+  ## Places the extra elements
+  extras_lbl + extras_img
+
+# Generates the interactive version of the graphic
+ggiraph::girafe(
+  ggobj = static,
+  bg = "black",
+  width_svg = 5,
+  height_svg = 5,
+  options = list(
+    ggiraph::opts_tooltip(
+      css = "border-radius:3vmin;color:white;",
+      use_fill = TRUE,
+      opacity = 1
+    ),
+    ggiraph::opts_hover(
+      css = ggiraph::girafe_css(
+        css = "stroke:none;",
+        text = "fill:black;opacity:1;",
+        area = "fill:white;rx:4;opacity:1;",
+        image = "opacity:1;"
+      )
+    ),
+    ggiraph::opts_selection(
+      css = ggiraph::girafe_css(
+        css = "r:3.3pt;",
+        point = "stroke:black;stroke-width:1;",
+      ),
+      type = "single",
+      only_shiny = FALSE
+    ),
+    ggiraph::opts_selection_inv(css = "opacity:0.1;"),
+    ggiraph::opts_toolbar(saveaspng = FALSE)
+  )
+)
+
+```
