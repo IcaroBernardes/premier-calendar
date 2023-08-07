@@ -1,21 +1,21 @@
-// Gera o menu Selectize e define o efeito de sua seleção
+// Creates the Selectize menu and defines its selection effect
 $(document).ready(function () {
     $(function () {
         $("#menu").selectize({
             options: selectopts,
             labelField: 'label',
             searchField: ['label', 'value'],
-            placeholder: 'Selecione um time',
+            placeholder: 'Pick a team',
             delimiter: ',',
             onChange: function (value) {
 
-                // Define valores em função de haver ou não seleção
+                // Defines the values as function of the selection (or its absence)
                 let teamid = '';
                 let teampage = '';
                 let teamcolor = '';
                 if (value === "") {
-                    teamid = '#time1';
-                    teampage = 'time1.html';
+                    teamid = '#team1';
+                    teampage = 'team1.html';
                     teamcolor = '#202020';
                 } else {
                     teamid = '#' + value.split(",")[0];
@@ -23,8 +23,8 @@ $(document).ready(function () {
                     teamcolor = value.split(",")[1];
                 }
 
-                // Aplica a id e nome da página do clube selecionado
-                async function empilhadeira() {
+                // Apply the ID and name of the page of the selected team
+                async function switcher() {
 
                     await new Promise((resolve) =>
                         resolve($(document.documentElement).find('.content').fadeOut('slow')),
@@ -41,9 +41,9 @@ $(document).ready(function () {
                     $(document.documentElement).find(teamid).fadeIn(2000);
 
                 }
-                empilhadeira();
+                switcher();
 
-                // Aplica a cor da barra lateral e sua sombra
+                // Applies the color and shadow of the sidebar
                 let styles = {
                     backgroundColor: teamcolor,
                     boxShadow: teamcolor + " 2px 0 6px 3px"

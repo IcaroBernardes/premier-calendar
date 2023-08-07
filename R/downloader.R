@@ -17,7 +17,7 @@ old <- readr::read_csv("data/results_old.csv")
 oldest <- oldest |> 
   dplyr::mutate(DateTime = lubridate::floor_date(DateTime, unit = "day"))
 
-## Adds season and converts date  [old]
+## Adds season and converts date [old]
 old <- old |> 
   dplyr::mutate(Date = lubridate::dmy(Date),
                 season = "2021-22")
@@ -33,7 +33,7 @@ oldest <- oldest |>
                 "winner" = "FTR") |> 
   dplyr::select(season, day, home, away, homeGoals, awayGoals, winner)
 
-## Keeps only columns of interest and renames them  [old]
+## Keeps only columns of interest and renames them [old]
 old <- old |> 
   dplyr::rename("day" = "Date",
                 "home" = "HomeTeam",

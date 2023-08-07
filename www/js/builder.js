@@ -1,13 +1,13 @@
-// Insere os iframes dentro de #container
+// Places the iframes inside #container 
 $(document).ready(function () {
-    // Cria a estrutura HTML em forma de string
+    // Creates the HTML structure as a string
     let listHTML = teams.map((el) => {
         return "<iframe class='content' id='" + el + "' src=''>";
     });
 
-    // Adiciona o placeholder sem opacidade e com atributo "src" preenchido
-    listHTML.push("<iframe class='content' id='time1' src='time1.html' style='display:inline;'>");
+    // Adds the placeholder with zero opacity and the "src" attribute filled
+    listHTML.push("<iframe class='content' id='team1' src='team1.html' style='display:inline;'>");
 
-    // Aplica a string ao #container como uma estrutura HTML
+    // Applies the string to #container as an HTML structure
     $("#container").html(listHTML);
 });

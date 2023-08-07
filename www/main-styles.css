@@ -22,10 +22,10 @@ body {
 #sidebar {
   width: 20vw;
   height: 100vh;
-  padding: 3vmin;
+  padding: 5vmin 3vmin;
   display: flex;
   flex-direction: column;
-  gap: 5vh;
+  gap: 3vh;
   z-index: 1;
   background-color: #202020;
   box-shadow: #202020 2px 0 6px 3px;
@@ -50,7 +50,16 @@ body {
 
 /* Configura elementos no menu lateral */
 #title {
-  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+}
+
+#title img {
+  width: 45%;
+}
+
+#title div {
+  font-size: 1.5em;
   font-weight: bold;
   line-height: 1.1;
 }
@@ -66,10 +75,17 @@ body {
   font-size: 0.95em;
 }
 
-#explanation, #authorship {
+#introduction, #explanation, #authorship {
   width: 100%;
-  font-size: 0.8em;
   color: #afafaf;
+}
+
+#introduction {
+  font-size: 0.6em;
+}
+
+#explanation, #authorship {
+  font-size: 0.8em;
 }
 
 #context strong {

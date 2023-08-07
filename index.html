@@ -35,7 +35,7 @@
     <!-- Connects to the JS script that creates the Selectize menu and defines its selection effect -->
     <script src="www/js/selector.js"></script>
 
-    <!-- Connects to the JS script that appends the iframes inside #container -->
+    <!-- Connects to the JS script that places the iframes inside #container -->
     <script src="www/js/builder.js"></script>
 
     <!-- Connects to the JS script that adjust the font size to fit a given container -->
@@ -60,20 +60,33 @@
         <div id="sidebar">
 
             <!-- Places the page title -->
-            <div id="title">PREMIER LEAGUE CALENDAR</div>
+            <div id="title">
+                <img src="www/PL.svg" />
+                <div>PREMIER LEAGUE CALENDAR</div>
+            </div>
 
+            <!-- Places an introduction on the league -->
+            <div id="introduction">
+                The Premier League started in 1992 as a schism of 22 teams from the English Football League.
+                Since its inception it has been the main league of England.
+                In 1995 the league arrived at its current format with 38 turns and 20 clubs.
+            </div>
+            
             <!-- Places the tag that will receive the menu -->
             <select id="menu"></select>
 
             <!-- Places context and acknowledgments -->
             <div id="context">
 
-                <div id="explanation">
-                    <p>Desde 2006 a Série A do Brasileirão adotou um modelo de 38 rodadas com 20 clubes. O <strong>menu
-                            acima</strong> permite <strong>selecionar</strong> um dos <strong>42 clubes</strong> que participaram desse
-                        formato do campeonato em ao menos uma temporada.</p>
-                    <p>Ao selecionar um <strong>clube</strong> seu <strong>calendário</strong> de resultados é exibido à
-                        <strong>direita</strong>. Há duas formas de interagir com o calendário através do mouse:
+                <div id="explanation">                    
+                    <p>
+                        The <strong>menu</strong> above allows you to <strong>pick</strong> one out of all the
+                        <strong>48 teams</strong> that participated on the league at least once since 1995.
+                    </p>
+                    <p>
+                        Once a <strong>team</strong> is picked, a <strong>calendar</strong> of its matches
+                        is shown on the <strong>right</strong>. There are two ways to interact with the calendar
+                        with the mouse:
                     </p>
                 </div>
 
@@ -82,23 +95,21 @@
                     <img src="www/mouse_hover.png" />
                     <div>Click</div>
                     <div>Hover</div>
-                    </div>
                 </div>
 
                 <div id="authorship">
-                    <p>Página feita por <strong>Ícaro Bernardes</strong> com R e HTML+CSS+JS. Códigos comentados no <a
-                            href="https://github.com/IcaroBernardes/calendario-brasileirao"
-                            target="_blank">repositório</a>.</p>
-                    <p>Dados obtidos através do pacote <a href="https://github.com/williamorim/brasileirao"
-                            target="_blank">{brasileirao}</a> criado por <a href="https://github.com/williamorim"
-                            target="_blank">William Amorim</a></p>
-                    <p><strong>Perfis digitais:</strong></p>
+                    <p>
+                        Page by <strong>Ícaro Bernardes</strong>. Made with R and HTML+CSS+JS. Commented codes at the 
+                        <a href="https://github.com/IcaroBernardes/premier-calendar" target="_blank">repository</a>.
+                    </p>
+                    <p>
+                        Data downloaded from <strong>Kaggle</strong> and scrapped from <strong>Globo Esporte</strong>.
+                    </p>
+                    <p><strong>My digital profiles:</strong></p>
                     <p id="profiles">
                         <a href="https://twitter.com/icarobsc" target="_blank"><span class="glyphs" id="twt"></span></a>
-                        <a href="https://github.com/IcaroBernardes" target="_blank"><span class="glyphs"
-                                id="ghb"></span></a>
-                        <a href="https://www.linkedin.com/in/icarobsc" target="_blank"><span class="glyphs"
-                                id="lkd"></span></a>
+                        <a href="https://github.com/IcaroBernardes" target="_blank"><span class="glyphs" id="ghb"></span></a>
+                        <a href="https://www.linkedin.com/in/icarobsc" target="_blank"><span class="glyphs" id="lkd"></span></a>
                     </p>
                 </div>
 
