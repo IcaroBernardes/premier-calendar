@@ -1,4 +1,4 @@
-# Premier League Calendar <img align="left" src="https://github.com/IcaroBernardes/premier-calendar/assets/7217965/7bceb5b2-f8d1-4dda-891d-be0a3807c74e" alt="" width="200">
+# Premier League Calendar <img align="left" src="https://github.com/IcaroBernardes/premier-calendar/assets/7217965/7bceb5b2-f8d1-4dda-891d-be0a3807c74e" alt="" width="300">
 
 The Premier League started in 1992 as a schism of 22 teams from the English Football League. Since its inception, it has been the main league of England. In 1995 the league arrived at its current format with 38 turns and 20 clubs. This page shows a circular calendar of matches for all 48 clubs that participated in the league at least once since 1995.
 
