@@ -126,8 +126,8 @@ if (selected_team == "team1") {
       from 1 <span style='color:#A82A00;'>(red)</span> to 100 <span style='color:#00A81C;'>(green)</span>.<br>
       Seasons in which the team was<br>out of the Premier League are in <span style='color:#636363;'>(gray)</span>.<br><br>
       Points deductions are included:<br>
-      <sub>Middlesbrough (-3pts on 1996-97);<br>
-      Portsmouth (-9pts on 2009-10)</sub>",
+      <sub>Middlesbrough (-3pts in 1996-97);<br>
+      Portsmouth (-9pts in 2009-10)</sub>",
       
       "Smaller bubbles represent the result of a match:<br>
       victories <span style='color:#00CC22;'>(green)</span>, draws <span style='color:white;'>(white)</span> e defeats <span style='color:#EB3B00;'>(red)</span>.<br>
